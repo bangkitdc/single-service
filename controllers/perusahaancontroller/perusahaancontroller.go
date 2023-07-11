@@ -21,7 +21,7 @@ func GetPerusahaans(w http.ResponseWriter, r *http.Request) {
 	query := models.DB
 
 	if q != "" {
-		query = query.Where("nama = ? OR kode = ?", q, q)
+		query = query.Where("nama ILIKE ? OR kode ILIKE ?", "%"+q+"%", "%"+q+"%")
 	}
 
 	err := query.Find(&perusahaans).Error
@@ -32,7 +32,7 @@ func GetPerusahaans(w http.ResponseWriter, r *http.Request) {
 
 	// Find always returns false, so have to do it manually
 	if len(perusahaans) == 0 {
-		helper.ResponseJSON(w, http.StatusNotFound, "success", "No data available", []interface{}{})
+		helper.ResponseJSON(w, http.StatusOK, "success", "No data available", []interface{}{})
 		return
 	}
 
@@ -64,7 +64,7 @@ func GetPerusahaanByID(w http.ResponseWriter, r *http.Request) {
 	if err := models.DB.Where("id = ?", id).First(&perusahaan).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
-			helper.ResponseJSON(w, http.StatusUnauthorized, "error", "No data available", nil)
+			helper.ResponseJSON(w, http.StatusNotFound, "error", "No data available", nil)
 			return
 
 		default:

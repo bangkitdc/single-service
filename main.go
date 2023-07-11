@@ -10,16 +10,10 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
-
-type User struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Name     string `json:"name"`
-	Password string `json:"password"`
-}
 
 func main() {
 	// Conect DB
@@ -27,6 +21,11 @@ func main() {
 
 	// Create router
 	router := mux.NewRouter()
+
+	// Enable CORS
+	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
+	origins := handlers.AllowedOrigins([]string{"https://ohl-fe.vercel.app"})
 
 	// Login
 	router.HandleFunc("/login", authcontroller.Login).Methods("POST")
@@ -36,7 +35,7 @@ func main() {
 	api.Use(middleware.JWTMiddleware)
 
 	// User
-	api.HandleFunc("/", selfcontroller.GetSelf).Methods("GET")
+	api.HandleFunc("/self", selfcontroller.GetSelf).Methods("GET")
 
 	// Barang
 	api.HandleFunc("/barang", barangcontroller.GetBarangs).Methods("GET")
@@ -52,13 +51,9 @@ func main() {
 	api.HandleFunc("/perusahaan/{id}", perusahaancontroller.UpdatePerusahaan).Methods("PUT")
 	api.HandleFunc("/perusahaan/{id}", perusahaancontroller.DeletePerusahaan).Methods("DELETE")
 
-	// Start server
-	log.Fatal(http.ListenAndServe(":8000", jsonContentTypeMiddleware(router)))
-}
+	// Apply CORS middleware
+	corsHandler := handlers.CORS(headers, methods, origins)(router)
 
-func jsonContentTypeMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		next.ServeHTTP(w, r)
-	})
+	// Start server
+	log.Fatal(http.ListenAndServe(":8000", corsHandler))
 }

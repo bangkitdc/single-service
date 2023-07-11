@@ -53,7 +53,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// JWT token
-	expiredTime := time.Now().Add(time.Minute * 5)
+	expiredTime := time.Now().Add(time.Hour * 1)
 	claims := &config.JWTClaim{
 		Username: user.Username,
 		Name:     user.Name,

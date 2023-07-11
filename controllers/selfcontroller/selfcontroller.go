@@ -12,7 +12,6 @@ func GetSelf(w http.ResponseWriter, r *http.Request) {
 	// Get the current user information
 	// Check the Authorization header
 	tokenString := r.Header.Get("Authorization")
-	tokenString = tokenString[len("Bearer "):] // Remove the "Bearer " prefix
 
 	// Parse the token and extract the claims
 	claims := &config.JWTClaim{}

@@ -5,7 +5,6 @@ import (
 	"api/helper"
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -19,13 +18,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		authHeaderParts := strings.Split(authHeader, " ")
-		if len(authHeaderParts) != 2 || authHeaderParts[0] != "Bearer" {
-			helper.ResponseJSON(w, http.StatusUnauthorized, "error", "Invalid authorization header", nil)
-			return
-		}
-
-		tokenString := authHeaderParts[1]
+		tokenString := authHeader
 
 		claims := &config.JWTClaim{}
 
