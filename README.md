@@ -1,7 +1,7 @@
 # F01 - Single Service (BE)
 
 ## Documentation
-You can read all API documentation from here [Documentation](EXPLANATION.md)
+You can read all technical and API documentation from here [Documentation](EXPLANATION.md)
 
 ## Brief Description
 This service serves as a backend for the Admin Page and callbacks from the monolith system.
