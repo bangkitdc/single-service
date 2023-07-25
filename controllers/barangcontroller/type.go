@@ -18,3 +18,18 @@ type BarangResponse struct {
 	Kode          string    `json:"kode"`
 	Perusahaan_ID uuid.UUID `json:"perusahaan_id"`
 }
+
+type PaginatedResponse struct {
+	Data []BarangResponse `json:"data"`
+	Meta Pagination       `json:"meta"`
+}
+
+type Pagination struct {
+	Total        int64 `json:"total"`
+	Current_Page int   `json:"current_page"`
+	Total_Pages  int   `json:"total_pages"`
+}
+
+type BarangRequestQuantity struct {
+	Quantity *int `json:"quantity"`
+}

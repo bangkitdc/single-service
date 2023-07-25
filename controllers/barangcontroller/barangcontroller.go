@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
@@ -29,6 +31,9 @@ func GetBarangs(w http.ResponseWriter, r *http.Request) {
 	if perusahaanID != "" {
 		query = query.Where("perusahaan_id = ?", perusahaanID)
 	}
+
+	// Order by UUID
+	query = query.Order("nama")
 
 	err := query.Find(&barangs).Error
 	if err != nil {
@@ -303,4 +308,196 @@ func CheckConstraint(responseBody *models.Barang, checkKode bool) string {
 	}
 
 	return message
+}
+
+// Pagination
+func GetBarangsWithPagination(w http.ResponseWriter, r *http.Request) {
+	// Get query parameters
+	queryParams := r.URL.Query()
+	q := queryParams.Get("q")
+	perusahaanID := queryParams.Get("perusahaan")
+	pageStr := queryParams.Get("page")
+
+	// Convert page query parameter to an integer
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1 // Default page number if not provided or invalid
+	}
+
+	// Set the number of items per page
+	limit := 8
+
+	// Calculate the offset
+	offset := (page - 1) * limit
+
+	// Get Barang with pagination
+	var barangs []models.Barang
+	query := models.DB
+
+	if q != "" {
+		query = query.Where("nama ILIKE ? OR kode ILIKE ?", "%"+q+"%", "%"+q+"%")
+	}
+
+	if perusahaanID != "" {
+		query = query.Where("perusahaan_id = ?", perusahaanID)
+	}
+
+	// Order by UUID
+	query = query.Order("nama")
+
+	// Get total count without applying pagination
+	var totalCount int64
+	query.Model(&models.Barang{}).Count(&totalCount)
+
+	// Calculate the total number of pages
+	totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
+
+	// Apply pagination
+	query = query.Offset(offset).Limit(limit)
+
+	err = query.Find(&barangs).Error
+	if err != nil {
+		helper.ResponseJSON(w, http.StatusInternalServerError, "error", err.Error(), nil)
+		return
+	}
+
+	// Construct the response data
+	var responseData []BarangResponse
+	for _, barang := range barangs {
+		item := BarangResponse{
+			ID:            barang.ID,
+			Harga:         barang.Harga,
+			Nama:          barang.Nama,
+			Stok:          barang.Stok,
+			Kode:          barang.Kode,
+			Perusahaan_ID: barang.Perusahaan_ID,
+		}
+		responseData = append(responseData, item)
+	}
+
+	// Construct the pagination metadata
+	pagination := Pagination{
+		Total:        totalCount,
+		Current_Page: page,
+		Total_Pages:  totalPages,
+	}
+
+	helper.ResponseJSON(w, http.StatusOK, "success", "Barang retrieved successfully", PaginatedResponse{
+		Data: responseData,
+		Meta: pagination,
+	})
+}
+
+// Recommendation
+func GetBarangsRecommendation(w http.ResponseWriter, r *http.Request) {
+	// Get query parameters
+	queryParams := r.URL.Query()
+	nama := queryParams.Get("nama")
+	except := queryParams.Get("except")
+
+	// Find the barang with the given nama
+	var barang models.Barang
+	if err := models.DB.Where("nama LIKE ?", "%"+nama+"%").First(&barang).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			helper.ResponseJSON(w, http.StatusNotFound, "error", "Barang not found", nil)
+			return
+		default:
+			helper.ResponseJSON(w, http.StatusInternalServerError, "error", "Failed to retrieve Barang", nil)
+			return
+		}
+	}
+
+	// Get Barangs with the same perusahaan_id (up to a maximum of 4 random items)
+	var barangs []models.Barang
+	err2 := models.DB.Where("perusahaan_id = ? AND nama != ?", barang.Perusahaan_ID, except).Order("RANDOM()").Limit(4).Find(&barangs).Error
+	if err2 != nil {
+		helper.ResponseJSON(w, http.StatusInternalServerError, "error", err2.Error(), nil)
+		return
+	}
+
+	// Find always returns false, so have to do it manually
+	if len(barangs) == 0 {
+		helper.ResponseJSON(w, http.StatusOK, "success", "No data available", []interface{}{})
+		return
+	}
+
+	// Construct the response data
+	var responseData []BarangResponse
+	for _, barang := range barangs {
+		item := BarangResponse{
+			ID:            barang.ID,
+			Harga:         barang.Harga,
+			Nama:          barang.Nama,
+			Stok:          barang.Stok,
+			Kode:          barang.Kode,
+			Perusahaan_ID: barang.Perusahaan_ID,
+		}
+		responseData = append(responseData, item)
+	}
+
+	helper.ResponseJSON(w, http.StatusOK, "success", "Barang retrieved successfully", responseData)
+}
+
+// Update Stok
+func UpdateBarangWithQuantity(w http.ResponseWriter, r *http.Request) {
+	// Extract the ID parameter from the request URL
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	// Parse the request body
+	var requestBody BarangRequestQuantity
+
+	err := json.NewDecoder(r.Body).Decode(&requestBody)
+	if err != nil {
+		helper.ResponseJSON(w, http.StatusBadRequest, "error", "Invalid request body", nil)
+		return
+	}
+
+	// Validate the required fields
+	if requestBody.Quantity == nil {
+		helper.ResponseJSON(w, http.StatusBadRequest, "error", "Missing required fields", nil)
+		return
+	}
+
+	// Retrieve the existing Barang from the database using the ID
+	var barang models.Barang
+	if err := models.DB.Where("id = ?", id).First(&barang).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			helper.ResponseJSON(w, http.StatusNotFound, "error", "Barang not found", nil)
+			return
+		default:
+			helper.ResponseJSON(w, http.StatusInternalServerError, "error", "Failed to retrieve Barang", nil)
+			return
+		}
+	}
+
+	// Update the fields of the existing Barang with the new values
+	barang.Stok -= *requestBody.Quantity
+
+	// Check contraint
+	if barang.Stok < 0 {
+		helper.ResponseJSON(w, http.StatusBadRequest, "error", "Check the stock again", nil)
+		return
+	}
+
+	// Save the updated Barang back to the database
+	if err := models.DB.Save(&barang).Error; err != nil {
+		helper.ResponseJSON(w, http.StatusInternalServerError, "error", "Failed to Checkout Barang", nil)
+		return
+	}
+
+	// Create the response data
+	responseData := BarangResponse{
+		ID:            barang.ID,
+		Nama:          barang.Nama,
+		Harga:         barang.Harga,
+		Stok:          barang.Stok,
+		Kode:          barang.Kode,
+		Perusahaan_ID: barang.Perusahaan_ID,
+	}
+
+	// Return the response JSON
+	helper.ResponseJSON(w, http.StatusOK, "success", "Barang updated successfully", responseData)
 }

@@ -51,6 +51,18 @@ func main() {
 	api.HandleFunc("/perusahaan/{id}", perusahaancontroller.UpdatePerusahaan).Methods("PUT")
 	api.HandleFunc("/perusahaan/{id}", perusahaancontroller.DeletePerusahaan).Methods("DELETE")
 
+	// Doesn't need authorization, for monolith-service purpose only
+	// Pagination Barang
+	router.HandleFunc("/barang-paginate", barangcontroller.GetBarangsWithPagination).Methods("GET")
+
+	// Barang
+	router.HandleFunc("/barang-noauth/{id}", barangcontroller.GetBarangByID).Methods("GET")
+	router.HandleFunc("/barang-noauth/{id}", barangcontroller.UpdateBarangWithQuantity).Methods("PUT")
+	router.HandleFunc("/barang-noauth-recommendation", barangcontroller.GetBarangsRecommendation).Methods("GET")
+
+	// Perusahaan
+	router.HandleFunc("/perusahaan-noauth/{id}", perusahaancontroller.GetPerusahaanByID).Methods("GET")
+
 	// Apply CORS middleware
 	corsHandler := handlers.CORS(headers, methods, origins)(router)
 

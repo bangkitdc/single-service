@@ -24,6 +24,9 @@ func GetPerusahaans(w http.ResponseWriter, r *http.Request) {
 		query = query.Where("nama ILIKE ? OR kode ILIKE ?", "%"+q+"%", "%"+q+"%")
 	}
 
+	// Order by UUID
+	query = query.Order("nama")
+
 	err := query.Find(&perusahaans).Error
 	if err != nil {
 		helper.ResponseJSON(w, http.StatusInternalServerError, "error", err.Error(), nil)
