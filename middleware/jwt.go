@@ -11,7 +11,7 @@ import (
 
 func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// If token is not found in the cookie, check the Authorization header
+		// Check the Authorization header
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" { // If Authorization header is not found also
 			helper.ResponseJSON(w, http.StatusUnauthorized, "error", "Unauthorized", nil)
@@ -19,7 +19,6 @@ func JWTMiddleware(next http.Handler) http.Handler {
 		}
 
 		tokenString := authHeader
-
 		claims := &config.JWTClaim{}
 
 		// Parse tokens

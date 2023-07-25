@@ -23,6 +23,7 @@ func ConnectDatabase() {
 		log.Fatalf("Failed to enable uuid-ossp extension: %v", err)
 	}
 
+	// Migration
 	db.AutoMigrate(&User{}, &Perusahaan{}, &Barang{})
 
 	DB = db

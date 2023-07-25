@@ -244,6 +244,7 @@ func DeletePerusahaan(w http.ResponseWriter, r *http.Request) {
 	helper.ResponseJSON(w, http.StatusOK, "success", "Perusahaan deleted successfully", responseData)
 }
 
+// Constraint Checker
 func CheckConstraint(responseBody *models.Perusahaan) string {
 	if len(responseBody.Kode) != 3 {
 		return "Kode (pajak) must be consists of 3 capital letters"

@@ -3,7 +3,6 @@ package helper
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -29,22 +28,4 @@ func ResponseJSON(w http.ResponseWriter, code int, status string, message string
 
 func IsEmpty(s string) bool {
 	return strings.TrimSpace(s) == ""
-}
-
-func IncrementID(id string) string {
-	// Convert the ID to an integer
-	num, err := strconv.Atoi(id)
-	if err != nil {
-		// Handle the error when the ID cannot be converted to an integer
-
-		return "error"
-	}
-
-	// Increment the numeric value
-	num++
-
-	// Convert the incremented value back to a string
-	incrementedID := strconv.Itoa(num)
-
-	return incrementedID
 }

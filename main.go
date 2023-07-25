@@ -19,6 +19,9 @@ func main() {
 	// Conect DB
 	models.ConnectDatabase()
 
+	// Seed the database
+	models.Seeder()
+
 	// Create router
 	router := mux.NewRouter()
 
@@ -30,7 +33,7 @@ func main() {
 	// Login
 	router.HandleFunc("/login", authcontroller.Login).Methods("POST")
 
-	// Protected routes
+	// Protected routes (Middleware)
 	api := router.PathPrefix("/").Subrouter()
 	api.Use(middleware.JWTMiddleware)
 

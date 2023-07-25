@@ -259,6 +259,7 @@ func DeleteBarang(w http.ResponseWriter, r *http.Request) {
 	helper.ResponseJSON(w, http.StatusOK, "success", "Barang deleted successfully", responseData)
 }
 
+// Constraint Checker
 func CheckConstraint(responseBody *models.Barang, checkKode bool) string {
 	var message string
 
@@ -290,21 +291,19 @@ func CheckConstraint(responseBody *models.Barang, checkKode bool) string {
 	}
 
 	// Check Kode uniqueness
-	existingBarang := models.Barang{}
+	existingBarangs := make([]models.Barang, 0)
 	if checkKode {
-		if err := models.DB.Where("kode = ?", responseBody.Kode).First(&existingBarang).Error; err == nil {
-			if !helper.IsEmpty(message) {
-				message += ", "
-			}
-			message += "Kode must be unique"
-		}
+		models.DB.Where("kode = ?", responseBody.Kode).Find(&existingBarangs)
 	} else {
-		if err := models.DB.Where("kode = ? AND id != ?", responseBody.Kode, responseBody.ID).First(&existingBarang).Error; err == nil {
-			if !helper.IsEmpty(message) {
-				message += ", "
-			}
-			message += "Kode must be unique"
+		models.DB.Where("kode = ? AND id != ?", responseBody.Kode, responseBody.ID).Find(&existingBarangs)
+	}
+
+	if len(existingBarangs) > 0 {
+		// Records were found, so Kode is not unique
+		if !helper.IsEmpty(message) {
+			message += ", "
 		}
+		message += "Kode must be unique"
 	}
 
 	return message
