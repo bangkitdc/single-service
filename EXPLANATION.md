@@ -77,7 +77,7 @@ On my application I don't have to make another route for Get Barang by ID for Mo
 The Liskov Substitution Principle (LSP) is primarily concerned with the behavior of objects in a class hierarchy and how derived types can be substituted for their base types without affecting the correctness of the program. Since my doesn't involve inheritance or class hierarchies, LSP is not directly applicable in this context.
 
 **Implementation:** <br/>
-In Golang, LSP is not enforced through class inheritance but rather through the use of interfaces. Interfaces define behavior, and any type that satisfies the interface can be used interchangeably. 
+In Golang, LSP is not enforced through class inheritance but rather through the use of interfaces. Interfaces define behavior, and any type that satisfies the interface can be used interchangeably. Therefore, my implementation towards LSP is to use base response the APIResponse with Data inteface{}, which later will be extend by other type Data, such as PaginatedResponse, BarangResponse, PerusahaanResponse, etc. So the inheritance is not directly applicable, but use the same logic.
 
 4. Interface Segregation Principle (ISP)
 
