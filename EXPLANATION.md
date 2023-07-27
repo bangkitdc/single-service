@@ -70,7 +70,7 @@ Each component or class should have a single responsibility. I'm using Models-Co
 Entities (classes, modules, functions) should be open for extension but closed for modification.
 
 **Implementation:** <br/>
-On my application, I don't have to make another route for Get Barang by ID for Monolith Service that doesn't need to be authenticated when accessing the API. Instead, I'm using the same Get Barang by ID method but without the middleware, so that anyone can consume the API. Besides of that I'm using the function CheckConstraint which can be used by two conditional, I added checkKode (boolean) on the parameter, and I extend the use of that function instead of making a new one.
+On my application, I don't have to make another route for Get Barang by ID for Monolith Service that doesn't need to be authenticated when accessing the API. Instead, I'm using the same Get Barang by ID method but without the middleware, so that anyone can consume the API. Besides that, I'm using the function CheckConstraint which can be used by two conditional. I added checkKode (boolean) on the parameter and I extended the use of that function instead of making a new one.
 
 3. Liskov Substitution Principle (LSP)
 
@@ -85,7 +85,7 @@ The Interface Segregation Principle is about creating specific interfaces that a
 
 **Implementation:**
 
-```go
+``` go
 func GetPerusahaans(w http.ResponseWriter, r *http.Request) {
   // ...
 }
@@ -108,7 +108,7 @@ func DeletePerusahaan(w http.ResponseWriter, r *http.Request) {
 ```
 In this code, each of the functions above represents an HTTP handler that corresponds to a specific HTTP endpoint (GET, POST, PUT, DELETE) related to the resource. ISP is adhered to in this case because each function represents a separate and specific interface that handles one type of request (HTTP method) related to resources. The functions are segregated based on their specific responsibilities.
 
-```go
+``` go
 type BarangRequest struct {
   // ...
 }
