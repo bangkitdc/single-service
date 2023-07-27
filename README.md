@@ -19,7 +19,7 @@ This service serves as a backend for the Admin Page and callbacks from the monol
 - Docker
 
 ## How to Run
-Before you run this project locally, you can copy .env.example into .env then set the environment. After that, run it with docker.
+Before you run this project locally, you can copy .env.example into .env and then set the environment. After that, run it with docker.
 ```sh
     docker-compose build
     docker-compose up -d
