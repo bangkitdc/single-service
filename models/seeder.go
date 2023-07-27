@@ -39,42 +39,62 @@ func seedUsers() {
 
 func seedPerusahaans() {
 	// Generate and seed fake perusahaan data
-	perusahaans := make([]Perusahaan, 10)
-	for _, perusahaan := range perusahaans {
-		nama := gofakeit.Company()
-		perusahaan.Nama = "PT " + strings.Title(nama)
-		perusahaan.Alamat = "Jalan " + gofakeit.StreetName()
-		perusahaan.Kode = generateRandomAlphabet(3)
+	perusahaans := make([]Perusahaan, 0, 10)
+	// Create a set to store used company names
+	usedNames := make(map[string]bool)
 
-		// Manually generate the phone number with "08" prefix and 10 random digits
-		perusahaan.No_Telp = "08" + generateRandomDigits(10)
-
-		if err := DB.Create(&perusahaan).Error; err != nil {
-			log.Fatalf("Failed to seed perusahaan: %v", err)
+	for len(perusahaans) < 10 {
+		// Generate a unique company name for the perusahaan
+		nama := strings.Title(gofakeit.Company())
+		if !usedNames[nama] {
+			usedNames[nama] = true
+			perusahaan := Perusahaan{
+				Nama:    "PT " + nama,
+				Alamat:  "Jalan " + gofakeit.StreetName(),
+				Kode:    generateRandomAlphabet(3),
+				No_Telp: "08" + generateRandomDigits(10),
+			}
+			perusahaans = append(perusahaans, perusahaan)
 		}
+	}
+
+	// Batch insert the generated perusahaans
+	if err := DB.Create(&perusahaans).Error; err != nil {
+		log.Fatalf("Failed to seed perusahaans: %v", err)
 	}
 }
 
 func seedBarangs() {
 	// Generate and seed fake barang data
-	barangs := make([]Barang, 20)
+	barangs := make([]Barang, 0, 20)
 	// Fetch all Perusahaan IDs from the database
 	var perusahaanIDs []uuid.UUID
 	if err := DB.Model(&Perusahaan{}).Pluck("id", &perusahaanIDs).Error; err != nil {
 		log.Fatalf("Failed to fetch Perusahaan IDs: %v", err)
 	}
 
-	for _, barang := range barangs {
-		nama := gofakeit.NounCountable()
-		barang.Nama = strings.Title(nama)
-		barang.Harga = rand.Intn(100) * 1000
-		barang.Stok = rand.Intn(1000)
-		barang.Kode = string(barang.Nama[0]) + generateRandomDigits(3)
-		barang.Perusahaan_ID = perusahaanIDs[rand.Intn(len(perusahaanIDs))]
+	// Create a map to store used names
+	usedNames := make(map[string]bool)
 
-		if err := DB.Create(&barang).Error; err != nil {
-			log.Fatalf("Failed to seed barang: %v", err)
+	for len(barangs) < 20 {
+		// Generate a unique name for the barang
+		nama := strings.Title(gofakeit.NounCountable())
+		if !usedNames[nama] {
+			usedNames[nama] = true
+			barang := Barang{
+				Nama:          nama,
+				Harga:         rand.Intn(100) * 1000,
+				Stok:          rand.Intn(1000),
+				Kode:          string(nama[0]) + generateRandomDigits(3),
+				Perusahaan_ID: perusahaanIDs[rand.Intn(len(perusahaanIDs))],
+			}
+			barangs = append(barangs, barang)
 		}
+	}
+
+	// Batch insert the generated barangs
+	if err := DB.Create(&barangs).Error; err != nil {
+		log.Fatalf("Failed to seed barang: %v", err)
 	}
 }
 

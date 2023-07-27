@@ -12,8 +12,8 @@ type BarangRequest struct {
 
 type BarangResponse struct {
 	ID            uuid.UUID `json:"id"`
-	Harga         int       `json:"harga"`
 	Nama          string    `json:"nama"`
+	Harga         int       `json:"harga"`
 	Stok          int       `json:"stok"`
 	Kode          string    `json:"kode"`
 	Perusahaan_ID uuid.UUID `json:"perusahaan_id"`
