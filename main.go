@@ -9,6 +9,7 @@ import (
 	"api/models"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -69,6 +70,17 @@ func main() {
 	// Apply CORS middleware
 	corsHandler := handlers.CORS(headers, methods, origins)(router)
 
+	var port = envPortOr("8000")
+
 	// Start server
-	log.Fatal(http.ListenAndServe(":8000", corsHandler))
+	log.Fatal(http.ListenAndServe(port, corsHandler))
+}
+
+func envPortOr(port string) string {
+	// If `PORT` variable in environment exists, return it
+	if envPort := os.Getenv("PORT"); envPort != "" {
+		return ":" + envPort
+	}
+	// Otherwise, return the value of `port` variable from function argument
+	return ":" + port
 }
