@@ -1,5 +1,8 @@
 # Explanation
 
+## B02 - Deployment
+[Single-Service](https://single-service-production-ed00.up.railway.app)
+
 ## B07 - Dokumentasi API
 You can read the full documentation here [Swagger](https://app.swaggerhub.com/apis/bangkitdc/single-service/1.0.0)
 
