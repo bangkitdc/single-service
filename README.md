@@ -30,3 +30,4 @@ It will automatically migrate and seed the database.
 
 ## Copyright
 2023 © bangkitdc. All Rights Reserved.
+NIM : 13521055
