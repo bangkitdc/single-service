@@ -30,5 +30,4 @@ It will automatically migrate and seed the database.
 
 ## Copyright
 2023 © bangkitdc. All Rights Reserved.
-Nama : Muhammad Bangkit Dwi Cahyono
-NIM : 13521055
+Nama : Muhammad Bangkit Dwi Cahyono </br> NIM : 13521055
