@@ -22,12 +22,16 @@ This service serves as a backend for the Admin Page and callbacks from the monol
 
 ## How to Run
 Before you run this project locally, you can copy the .env.example into .env and then set the environment. After that, run it with docker.
-```sh
+``` sh
     docker-compose build
     docker-compose up -d
 ```
 It will automatically migrate and seed the database.
-
+``` sh
+    username: admin
+    password: admin
+```
 ## Copyright
 2023 © bangkitdc. All Rights Reserved.
+
 Nama : Muhammad Bangkit Dwi Cahyono </br> NIM : 13521055
